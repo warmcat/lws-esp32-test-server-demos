@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset=utf-8 http-equiv="Content-Language" content="en"/>
+ <title>AP Configuration Page</title>
+<style type="text/css">
+th,td { padding: 5px; }
+.td-right { text-align: right; }
+.td-left { text-align: left; }
+.td-center { text-align: center; }
+.td-top { vertical-align: top; }
+.td-middle { vertical-align: middle; }
+.td-bottom { vertical-align: bottom; }
+.center-align { text-align: center; }
+.center-div { margin-left: auto; margin-right: auto; }
+.right-div { margin-left: auto; margin-right: 0; }
+.left-div { margin-left: 0; margin-right: auto; }
+td.bigt { font-size:40pt; font: Arial; font-weight:normal; text-align:center; color:#000000; }
+td.l { background-color: rgba(40, 40, 24, 0.6); color:#c0c0c0; }
+tr.ra { background-color: rgba(240, 240, 224, 0.6); color:#303030; }
+tr.ras { background-color: rgba(255, 255, 255, 0.8); color:#101010; }
+tr.rl { }
+.sub { font-size:24pt; font: Arial; font-weight:normal; text-align:center; color:#000000; }
+.tabt { font-size:18pt; font: Arial; font-weight:bold; text-align:center; color:#404040; }
+.tabv { font-size:18pt; font: Arial; font-weight:normal; text-align:center; color:#000000; }
+.btn { font-size:18pt; font: Arial; font-weight:normal; text-align:center; color:#000000; }
+.group2 { vertical-align:middle;
+	text-align:center;
+	background-color: rgba(240, 240, 224, 0.6); 
+	padding:12px; 
+	-webkit-border-radius:10px; 
+	-moz-border-radius:10px;
+	border-radius:10px;}
+</style>
+</head>
+
+<body style="background-image:url(backdrop.jpg); background-repeat: no-repeat; background-size: cover;">
+
+<table class="center-div" style="width: 600px;""><tr><td class="td-center">
+<table>
+ <tr>
+  <td valign=middle align=center>
+   <a href="https://libwebsockets.org">
+    <img src="wifi-120.png"></a>
+  </td>
+  <td class="bigt">Wireless Configuration</td>
+ </tr>
+
+ <tr>
+  <td colspan=2 style="padding-top: 14px; padding-bottom:20px">
+	<table class="center-div" style="width: 450px">
+	 <tr>
+	  <td><img src="product.png"></td>
+	  <td class="group2" style="background-color: rgba(240, 240, 224, 0.4); font-size: 18pt">
+		<table class="center-div" style="padding:12px; ">
+			<tr><td class="tabt">Model</td><td class="tabv" style="text-align:left"><span id=model></span></td></tr>
+			<tr><td class="tabt">Serial</td><td class="tabv" style="text-align:left">
+					<input type=text id=serial size="8" style="font-size: 18pt"></input></td></tr>
+			<tr><td class="tabt">Regulatory Region</td><td class="tabv">
+	<select name="region" id="region" style="font-size: 18pt">
+		<option value="0">China + HK + Taiwan (ch 1-14)</option>
+		<option value="1">Japan (ch 1-14)</option>
+		<option value="2" selected>USA (ch 1-11)</option>
+		<option value="3">EU + UK (ch 1-13)</option>
+	</select>
+				</td></tr>
+		<tr><td colspan=2><input type=button class="btn" name="identify" value="Identify physical device"
+				onclick="do_identify();" style="font-size: 18pt"></td></tr>
+
+		</table>
+	  </td>
+	 </tr>
+        </table>
+  </td>
+ </tr> 
+
+ <tr>
+  <td colspan=2 class="group2" style="width:550px">
+    <div id="main">
+    <span class="sub">Select the AP we should join</span>
+	<table class="center-div" style="padding-top: 12px;">
+		<tr><td colspan=6>&nbsp;</td></tr><tr><td colspan=6 align=center style="font-size: 18pt">
+		<span id=pwt style="color:#808080">Password: </span>
+		<input disabled type="password" id="pw" oninput="rch(1);" style="font-size: 18pt" size="8"></input>
+		&nbsp;&nbsp;<input type=button value="Join AP" style="font-size: 18pt" disabled id=join onclick="do_join();"></td></tr>
+		<tr><td colspan=6>&nbsp;</td></tr>
+		<tr><td colspan=6 align=center><div id="scan" width="100%">Scanning...</div></td></tr>
+	</table>
+    </div>
+  </td>
+ </tr> 
+
+</table>
+</td>
+</tr>
+</table>
+
+<script>
+	var ws, sel, host, old, once = 0;
+	
+function san(s)
+{
+	if (s.search("<") != -1)
+		return "invalid string";
+	
+	return s;
+}
+
+function get_appropriate_ws_url()
+{
+	var pcol;
+	var u = document.URL;
+
+	/*
+	 * We open the websocket encrypted if this page came on an
+	 * https:// url itself, otherwise unencrypted
+	 */
+
+	if (u.substring(0, 5) == "https") {
+		pcol = "wss://";
+		u = u.substr(8);
+	} else {
+		pcol = "ws://";
+		if (u.substring(0, 4) == "http")
+			u = u.substr(7);
+	}
+
+	u = u.split('/');
+
+	/* + "/xxx" bit is for IE10 workaround */
+
+	return pcol + u[0] + "/xxx";
+}
+
+	var auth = [ "open", "wep", "wpa1", "wpa2", "wpa1" ];
+
+	if (typeof MozWebSocket != "undefined")
+		ws = new MozWebSocket(get_appropriate_ws_url(),
+				      "esplws-scan");
+	else
+		ws = new WebSocket(get_appropriate_ws_url(),
+				   "esplws-scan");
+
+	try {
+		ws.onopen = function() {
+			document.getElementById("scan").textContent = "open";
+
+		} 
+
+		ws.onmessage =function got_packet(msg) {
+			// document.getElementById("scan").textContent = msg.data + "\n";
+			var best, hit, n, m, s, b, a, cs, jso = JSON.parse(msg.data);
+			
+			cs = get_radio();
+		
+			host = jso.host;
+			if (once == 0) {
+				document.getElementById("model").textContent = jso.model;
+				document.getElementById("serial").value = jso.serial;
+				document.getElementById("region").value = jso.region;
+				once = 1;
+			}
+
+			s = "<tr class=rl><td class=l>sel</td><td class=l>SSID</td><td class=l>Chan</td><td class=l>RSSI</td><td class=l>Auth</td><td class=l>BSSID</td></tr>";
+	
+			for (m = 0; m < jso.aps.length; m++) {
+			
+				best = -128;
+
+				for (n = 0; n < jso.aps.length; n++)
+					if (parseInt(jso.aps[n].rssi) > best) {
+						best = parseInt(jso.aps[n].rssi);
+						hit = n;
+					}
+				b = 0;
+				if (best < -65)
+					b = 3;
+				if (best < -71)
+					b = 2;
+				if (best < -76)
+					b = 1;
+				if (best < -80)
+					b = 0;
+				
+				a= "";
+				for (n = 0; n < 4; n++)
+					if (b >= n)
+						a = a + "&#x25C9;";
+					else
+						a = a + "&#x25CC;";
+				var sel = "", ra = "ra";
+				if (cs == san(jso.aps[hit].ssid)) {
+					sel = " checked=\"checked\" ";
+					ra = "ras";
+				}
+
+				s = s + "<tr class=\"" + ra + "\" id=\""+san(jso.aps[hit].ssid)+"\">" +
+					  "<td><input type=radio name=ap value=\"" + san(jso.aps[hit].ssid) +
+					  	"\" "+ sel + "onchange=\"rch(" + parseInt(jso.aps[hit].auth) +
+					  	");\"></td>" +
+					  	
+					  "<td><b>" + san(jso.aps[hit].ssid) + "</b></td>" +
+					  "<td>" + san(jso.aps[hit].chan) + "</td>" +
+					  "<td>" + a + "</td>" +
+					  "<td><img src=\"lock-" + auth[parseInt(jso.aps[hit].auth)] + ".png\"></td>" +
+					  "<td>" + san(jso.aps[hit].bssid) + "</td>" +
+					"</tr>";
+					
+				jso.aps[hit].rssi = "-129";
+			}
+		
+			document.getElementById("scan").innerHTML = "<table witdh=100% style=\"border-spacing: 3px; padding: 3px;\">" + s + "</table>";
+
+		} 
+
+		ws.onclose = function(){
+			document.getElementById("scan").textContent = "closed";
+		}
+	} catch(exception) {
+		alert('<p>Error' + exception);
+	}
+
+function get_radio()
+{
+	var s = document.getElementsByName('ap');
+	for ( var i = 0; i < s.length; i++)
+	    if (s[i].checked) {
+	        sel = s[i].value;
+	        break;
+	    }
+
+	return sel;
+}
+
+function do_join()
+{
+	var s = "{\"ssid\":\"" + get_radio() + "\",\"pw\":\"" +
+			document.getElementById("pw").value + "\",\"region\":\"" +
+			document.getElementById("region").value + "\",\"serial\":\"" +
+		document.getElementById("serial").value + "\"}", h;
+	try {
+		ws.send(s);
+	} catch(exception) {
+		alert('Sorry, there was a problem' + exception);
+	}
+	
+	if (document.getElementById("serial").value)
+		h = document.getElementById("model").textContent + "-" +
+		    document.getElementById("serial").value;
+	else
+		h = host;
+	
+	document.getElementById('main').innerHTML =
+		"Thanks, the device is now using the new settings.  " +
+		"Please reconnect yourself to AP <b>" + get_radio() +
+		"</b> and access the device at " +
+		"<a href=\"https://" + host + "\">http://" + h + "</a>";
+}
+
+function do_identify()
+{
+	var s = "{\"identify\":\"1\"}";
+	try {
+		ws.send(s);
+	} catch(exception) {
+		alert('Sorry, there was a problem' + exception);
+	}
+}
+
+function rch(need_pw)
+{
+	var _old = old;
+	var sel = get_radio();
+	var butok = 1;
+
+	if (sel == "")
+		butok = 0;
+
+        if (_old && _old != "" && _old != sel)
+	      document.getElementById(_old).className = "ra";
+	old = sel;
+
+	if (sel && sel != "")
+		document.getElementById(sel).className = "ras";
+
+	document.getElementById('pw').disabled = !butok || need_pw == 0;
+	if (!butok || need_pw == 0)
+		document.getElementById('pwt').style.color = "#808080";
+	else
+		document.getElementById('pwt').style.color = "#000000";
+
+	if (need_pw != 0)
+		if (!document.getElementById("pw").value)
+			butok = 0;
+
+	document.getElementById('join').disabled = !butok;
+}
+	
+</script>
+
+</body>
+</html>
+
