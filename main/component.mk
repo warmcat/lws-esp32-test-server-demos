@@ -1,8 +1,14 @@
-#
-# Main component makefile.
-#
-# This Makefile can be left empty. By default, it will take the sources in the 
-# src/ directory, compile them and link them into lib(subdirectory_name).a 
-# in the build directory. This behaviour is entirely configurable,
-# please read the ESP-IDF documents if you need to do this.
-#
+#COMPONENT_EXTRA_CLEAN := logo.h
+main.o: prepare
+
+.PHONY: prepare
+prepare:
+	tail -n +2 $(SSL_CERT_PEM).pem | \
+		head -n -1 | base64 -d - \
+			> $(COMPONENT_PATH)/../romfs-files/ssl-cert.der
+	tail -n +2 $(SSL_KEY_PEM).pem | \
+		head -n -1 | base64 -d - \
+			> $(COMPONENT_PATH)/../romfs-files/ssl-key.der
+	genromfs -f romfs.img -d $(COMPONENT_PATH)/../romfs-files
+
+
