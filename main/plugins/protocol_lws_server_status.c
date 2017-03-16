@@ -206,7 +206,7 @@ static const struct lws_protocols protocols[] = {
 		"lws-server-status",
 		callback_lws_server_status,
 		sizeof(struct per_session_data__server_status),
-		1024, 0, NULL
+		1024, 0, NULL, 0
 	},
 };
 

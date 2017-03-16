@@ -160,7 +160,7 @@ done:
 		callback_lws_mirror, \
 		sizeof(struct per_session_data__lws_mirror), \
 		128, /* rx buf size must be >= permessage-deflate rx size */ \
-		0, NULL \
+		0, NULL, 0 \
 }
 
 #if !defined (LWS_PLUGIN_STATIC)

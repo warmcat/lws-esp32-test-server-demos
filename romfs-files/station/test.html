@@ -335,6 +335,9 @@ function check_file()
 
 Looking for support? <a href="https://libwebsockets.org">https://libwebsockets.org</a>, <a href="https://github.com/warmcat/libwebsockets">https://github.com/warmcat/libwebsockets</a></a><br/>
 Join the mailing list: <a href="https://libwebsockets.org/mailman/listinfo/libwebsockets">https://libwebsockets.org/mailman/listinfo/libwebsockets</a>
+<br>
+<button onclick="reset_to_factory();">Reset to configuration mode</button><br>
+<a href="/wap.zip/wap.html">3.9MB Copy of War and Peace served using a 1.2MB gzip directly from inside a zip file</a>
 
 </article>
 
@@ -536,6 +539,7 @@ document.getElementById("number").textContent = get_appropriate_ws_url();
 			document.getElementById("wsdi_status").innerHTML =
 				" <b>websocket connection opened</b><br>" +
 				san(socket_di.extensions);
+			lws_gray_out(false);
 		} 
 
 		socket_di.onmessage =function got_packet(msg) {
@@ -773,7 +777,23 @@ function ev_mousemove (ev) {
 	last_x = x;
 	last_y = y;
 }
+var xhr;
 
+function orsc(e)
+{
+    if (xhr.readyState == 4) {
+        //xhr.onreadystatechange = orsc;
+       	window.location.href = location.origin + "/";
+    }
+}
+
+function reset_to_factory() {
+        xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = orsc;
+        xhr.open("GET", location.origin + "/esp32-rtf", true);
+	xhr.send();
+	return false;
+}
 
 </script>
 

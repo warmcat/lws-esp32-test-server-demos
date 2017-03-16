@@ -6,17 +6,25 @@ PROJECT_NAME := lws-esp32
 SSL_CERT_PEM:=${PWD}/build/libwebsockets/libwebsockets-test-server
 SSL_KEY_PEM:=${PWD}/build/libwebsockets/libwebsockets-test-server.key
 
-export SSL_CERT_PEM
-export SSL_KEY_PEM
+EXTRA_COMPONENT_DIRS := components
+LWS_IS_FACTORY_APPLICATION=0
+export LWS_IS_FACTORY_APPLICATION
 
 include $(IDF_PATH)/make/project.mk
 include sdkconfig
-# stick the romfs filesystem in its own romfs part
-flash-romfs:
-	$(IDF_PATH)/components/esptool_py/esptool/esptool.py \
-		--chip esp32 \
-		--port $(CONFIG_ESPTOOLPY_PORT) \
-		--baud $(CONFIG_ESPTOOLPY_BAUD) \
-		write_flash 0x310000 build/main/romfs.img
+include ${PWD}/components/libwebsockets/scripts/esp32.mk
 
+CFLAGS+= -I$(COMPONENT_PATH)/../components/libwebsockets/plugins  -DLWS_IS_FACTORY_APPLICATION=$(LWS_IS_FACTORY_APPLICATION)
+
+export IDF_PATH
+
+$(COMPONENT_PATH)/../ssl-cert.der:
+	tail -n +2 $(SSL_CERT_PEM).pem | \
+		head -n -1 | base64 -d - \
+			> $(COMPONENT_PATH)/../ssl-cert.der
+
+$(COMPONENT_PATH)/../ssl-key.der:
+	tail -n +2 $(SSL_KEY_PEM).pem | \
+		head -n -1 | base64 -d - \
+			> $(COMPONENT_PATH)/../ssl-key.der
 

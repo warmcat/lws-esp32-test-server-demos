@@ -233,7 +233,7 @@ walk_final:
 		callback_lws_status, \
 		sizeof(struct per_session_data__lws_status), \
 		512, /* rx buf size must be >= permessage-deflate rx size */ \
-		0, NULL \
+		0, NULL, 0 \
 	}
 
 #if !defined (LWS_PLUGIN_STATIC)

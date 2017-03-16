@@ -21,15 +21,6 @@
 #include <libwebsockets.h>
 #include <nvs_flash.h>
 
-/* replace this with the model name of your device, eg "Bogotron 9000" */
-char lws_esp32_model[16] = "lws";
-
-/* 
- * where the ROMFS start in your partition table...
- * this already matches the provided partition table
- */
-#define ROMFS_START_IN_FLASH 0x310000
-
 /*
  * Configuration for normal station website
  *
@@ -45,19 +36,36 @@ char lws_esp32_model[16] = "lws";
 #include "plugins/protocol_lws_mirror.c"
 #include "plugins/protocol_post_demo.c"
 #include "plugins/protocol_lws_status.c"
+#include <protocol_esp32_lws_reboot_to_factory.c>
 
 static const struct lws_protocols protocols_station[] = {
 	{
 		"http-only",
 		lws_callback_http_dummy,
 		0,
-		900, 0, NULL
+		1024, 0, NULL, 900
 	},
 	LWS_PLUGIN_PROTOCOL_DUMB_INCREMENT, /* demo... */
 	LWS_PLUGIN_PROTOCOL_MIRROR,	    /* replace with */
 	LWS_PLUGIN_PROTOCOL_POST_DEMO,	    /* your own */
 	LWS_PLUGIN_PROTOCOL_LWS_STATUS,	    /* plugin protocol */
-	{ NULL, NULL, 0, 0, 0, NULL } /* terminator */
+	LWS_PLUGIN_PROTOCOL_ESPLWS_RTF,	/* helper protocol to allow reset to factory */
+	{ NULL, NULL, 0, 0, 0, NULL, 0 } /* terminator */
+};
+
+static const struct lws_protocol_vhost_options pvo_headers = {
+        NULL,
+        NULL,
+        "Keep-Alive:",
+        "timeout=5, max=20",
+};
+
+/* reset to factory mount */
+static const struct lws_http_mount mount_station_rtf = {
+	.mountpoint		= "/esp32-rtf",
+	.origin			= "esplws-rtf",
+	.origin_protocol	= LWSMPRO_CALLBACK,
+	.mountpoint_len		= 10,
 };
 
 /*
@@ -65,6 +73,7 @@ static const struct lws_protocols protocols_station[] = {
  * the "protocol-post-demo" plugin protocol for handling
  */
 static const struct lws_http_mount mount_station_post = {
+	.mount_next		= &mount_station_rtf,
 	.mountpoint		= "/formtest",
 	.origin			= "protocol-post-demo",
 	.origin_protocol	= LWSMPRO_CALLBACK,
@@ -88,24 +97,6 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
 	/* deal with your own user events here first */
 
 	return lws_esp32_event_passthru(ctx, event);
-}
-
-/*
- * This is called to find out if we should boot into AP / config mode.
- *
- * If the nvs setup data is missing, we always go into AP / config mode.
- *
- * But there should also be a device-specific way to hold down a
- * key at boot or whatever to force it, for example if he changes his
- * location or AP and can no longer connect normally.
- */
-int
-lws_esp32_is_booting_in_ap_mode(void)
-{
-	/* return 1 to force entry to AP mode */
-	// return 1;
-
-	return 0;
 }
 
 /*
@@ -133,25 +124,29 @@ void app_main(void)
 
 	info.port = 443;
 	info.fd_limit_per_thread = 30;
-	info.max_http_header_pool = 3;
+	info.max_http_header_pool = 4;
 	info.max_http_header_data = 512;
 	info.pt_serv_buf_size = 900;
 	info.keepalive_timeout = 5;
+	info.simultaneous_ssl_restriction = 4;
 	info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS |
 		       LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 
-	info.ssl_cert_filepath = "/ssl-cert.der";
-	info.ssl_private_key_filepath = "/ssl-key.der";
+	info.ssl_cert_filepath = "ssl-pub.der";
+	info.ssl_private_key_filepath = "ssl-pri.der";
 
 	info.vhost_name = "station";
 	info.protocols = protocols_station;
 	info.mounts = &mount_station;
+	info.headers = &pvo_headers;
 
 	nvs_flash_init();
 	lws_esp32_wlan_config();
+
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL));
-	lws_esp32_wlan_start();
-	context = lws_esp32_init(&info, ROMFS_START_IN_FLASH);
+
+	lws_esp32_wlan_start_station();
+	context = lws_esp32_init(&info);
 
 	while (!lws_service(context, 50))
 		vTaskDelay(1);

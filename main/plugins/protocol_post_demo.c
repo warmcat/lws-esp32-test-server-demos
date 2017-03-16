@@ -232,7 +232,7 @@ try_to_reuse:
 		"protocol-post-demo", \
 		callback_post_demo, \
 		sizeof(struct per_session_data__post_demo), \
-		1024, 0, NULL \
+		1024, 0, NULL, 0 \
 	}
 
 #if !defined (LWS_PLUGIN_STATIC)
