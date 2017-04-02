@@ -8,9 +8,16 @@ This relies on setup capability provided by
 https://github.com/warmcat/lws-esp32-factory
 
 which runs from the "factory" partition on ESP32.  This app is
-designed to run from the since 2.9MB OTA partition.
+designed to run from the 2.9MB OTA partition.
 
 ## Build
+
+Clone and bring in the lws submodule (it's unpatched lws master)
+
+```
+  $ git clone git@github.com:warmcat/lws-esp32-test-server-demos.git
+  $ git submodule update --init --recursive
+```
 
 ```
  $ make all flash_ota monitor
