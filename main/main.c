@@ -149,5 +149,5 @@ void app_main(void)
 	context = lws_esp32_init(&info);
 
 	while (!lws_service(context, 50))
-		vTaskDelay(1);
+		taskYIELD();
 }
