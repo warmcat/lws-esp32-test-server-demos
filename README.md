@@ -23,12 +23,6 @@ Clone and bring in the lws submodule (it's unpatched lws master)
  $ make all flash_ota monitor
 ```
 
-For build on mac, a user found it was necessary to do
-
-```
- $ make ; make pack.img flash_ota monitor
-```
-
 ## Using the lws test apps
 
 See what IP your ESP32 got from your AP, the visit it in your browser
