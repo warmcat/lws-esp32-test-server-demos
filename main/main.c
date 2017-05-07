@@ -115,6 +115,11 @@ lws_esp32_identify_physical_device(void)
 	lwsl_notice("%s\n", __func__);
 }
 
+void lws_esp32_leds_timer_cb(TimerHandle_t th)
+{
+}
+
+
 void app_main(void)
 {
 	static struct lws_context_creation_info info;
