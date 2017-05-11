@@ -137,8 +137,8 @@ void app_main(void)
 	info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS |
 		       LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 
-	info.ssl_cert_filepath = "ssl-pub.der";
-	info.ssl_private_key_filepath = "ssl-pri.der";
+	info.ssl_cert_filepath = "ssl-pub.pem";
+	info.ssl_private_key_filepath = "ssl-pri.pem";
 
 	info.vhost_name = "station";
 	info.protocols = protocols_station;

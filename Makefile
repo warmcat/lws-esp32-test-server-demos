@@ -2,7 +2,7 @@
 # This is a project Makefile. It is assumed the directory this Makefile resides in is a
 # project subdirectory.
 #
-PROJECT_NAME := lws-esp32
+PROJECT_NAME := lws-esp32-test-server-demos
 SSL_CERT_PEM:=${PWD}/build/libwebsockets/libwebsockets-test-server
 SSL_KEY_PEM:=${PWD}/build/libwebsockets/libwebsockets-test-server.key
 
