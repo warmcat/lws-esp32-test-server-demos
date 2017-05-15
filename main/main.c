@@ -133,7 +133,7 @@ void app_main(void)
 	info.max_http_header_data = 512;
 	info.pt_serv_buf_size = 900;
 	info.keepalive_timeout = 5;
-	info.simultaneous_ssl_restriction = 4;
+	info.simultaneous_ssl_restriction = 7;
 	info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS |
 		       LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 
