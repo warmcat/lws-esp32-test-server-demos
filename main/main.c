@@ -36,6 +36,7 @@
 #include "plugins/protocol_lws_mirror.c"
 #include "plugins/protocol_post_demo.c"
 #include "plugins/protocol_lws_status.c"
+#include "../components/libwebsockets/plugins/protocol_lws_meta.c"
 #include <protocol_esp32_lws_reboot_to_factory.c>
 
 static const struct lws_protocols protocols_station[] = {
@@ -50,6 +51,7 @@ static const struct lws_protocols protocols_station[] = {
 	LWS_PLUGIN_PROTOCOL_POST_DEMO,	    /* your own */
 	LWS_PLUGIN_PROTOCOL_LWS_STATUS,	    /* plugin protocol */
 	LWS_PLUGIN_PROTOCOL_ESPLWS_RTF,	/* helper protocol to allow reset to factory */
+	LWS_PLUGIN_PROTOCOL_LWS_META,	    /* protocol multiplexer */
 	{ NULL, NULL, 0, 0, 0, NULL, 0 } /* terminator */
 };
 
@@ -124,16 +126,17 @@ void app_main(void)
 {
 	static struct lws_context_creation_info info;
 	struct lws_context *context;
+	int next_dump_secs;
 
-	memset(&info, 0, sizeof(info));
+	lws_esp32_set_creation_defaults(&info);
 
 	info.port = 443;
 	info.fd_limit_per_thread = 30;
-	info.max_http_header_pool = 4;
+	info.max_http_header_pool = 3;
 	info.max_http_header_data = 512;
 	info.pt_serv_buf_size = 900;
 	info.keepalive_timeout = 5;
-	info.simultaneous_ssl_restriction = 7;
+	info.simultaneous_ssl_restriction = 3;
 	info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS |
 		       LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 
@@ -153,6 +156,15 @@ void app_main(void)
 	lws_esp32_wlan_start_station();
 	context = lws_esp32_init(&info);
 
-	while (!lws_service(context, 50))
+	next_dump_secs = lws_now_secs();
+
+	while (!lws_service(context, 50)) {
 		taskYIELD();
+
+		if (lws_now_secs() > next_dump_secs) {
+			lwsl_notice("Free heap: %d\n", esp_get_free_heap_size());
+			next_dump_secs = lws_now_secs() + 5;
+		}
+
+	}
 }
