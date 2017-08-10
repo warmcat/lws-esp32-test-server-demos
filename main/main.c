@@ -126,6 +126,7 @@ void app_main(void)
 {
 	static struct lws_context_creation_info info;
 	struct lws_context *context;
+	struct lws_vhost *vh;
 	int next_dump_secs;
 
 	lws_esp32_set_creation_defaults(&info);
@@ -154,7 +155,7 @@ void app_main(void)
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL));
 
 	lws_esp32_wlan_start_station();
-	context = lws_esp32_init(&info);
+	context = lws_esp32_init(&info, &vh);
 
 	next_dump_secs = lws_now_secs();
 
