@@ -127,7 +127,6 @@ void app_main(void)
 	static struct lws_context_creation_info info;
 	struct lws_context *context;
 	struct lws_vhost *vh;
-	int next_dump_secs;
 
 	lws_esp32_set_creation_defaults(&info);
 
@@ -157,15 +156,6 @@ void app_main(void)
 	lws_esp32_wlan_start_station();
 	context = lws_esp32_init(&info, &vh);
 
-	next_dump_secs = lws_now_secs();
-
-	while (!lws_service(context, 50)) {
+	while (!lws_service(context, 50))
 		taskYIELD();
-
-		if (lws_now_secs() > next_dump_secs) {
-			lwsl_notice("Free heap: %d\n", esp_get_free_heap_size());
-			next_dump_secs = lws_now_secs() + 5;
-		}
-
-	}
 }
