@@ -10,6 +10,21 @@ https://github.com/warmcat/lws-esp32-factory
 which runs from the "factory" partition on ESP32.  This app is
 designed to run from the 2.9MB OTA partition.
 
+## New!
+
+This includes the latest lws HTTP/2 support now, improved
+memory management for headers, and mbedTLS wrapper fixes to
+improve speed when multiple SSL connections are coming.
+
+## About this demo
+
+This demo is the standard lws test server using the standard lws test
+protocol plugins.
+
+When you open the page the html / png assets are served over http/2
+or http/1 depending on how you connected.  Then the browser connects
+back over http/1 and upgrades to ws.
+
 ## Build
 
 This was built and tested againt esp-idf 1773770f446fb12db2c18217f09fa9d0d2febd35.
