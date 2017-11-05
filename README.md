@@ -27,7 +27,7 @@ back over http/1 and upgrades to ws.
 
 ## Build
 
-This was built and tested againt esp-idf 1773770f446fb12db2c18217f09fa9d0d2febd35.
+This was built and tested againt esp-idf 0c50b65a34cd6b3954f7435193411a88adb49cb0.
 
 Clone and bring in the lws submodule (it's unpatched lws master)
 
