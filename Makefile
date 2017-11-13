@@ -15,6 +15,7 @@ include sdkconfig
 include ${PWD}/components/libwebsockets/scripts/esp32.mk
 
 CFLAGS+= -I$(PROJECT_PATH)/components/libwebsockets/plugins \
+	 -I$(BUILD_DIR_BASE)/libwebsockets/include \
 	 -I$(PROJECT_PATH)/components/libwebsockets/lib \
 	 -I$(IDF_PATH)/components/heap/include \
 	 -I$(IDF_PATH)/components/soc/include \
