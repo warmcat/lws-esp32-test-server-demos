@@ -557,29 +557,12 @@ if (params.mirror)
 	console.log(mirror_name);
 	
 
-/*
- * if using lws-meta to carry the other ws connections, declare the
- * parent connection object and start its connection to the server.
- *
- * These helpers are defined in lws-common.js
- */
-
-
-var lws_meta = new lws_meta_ws();
-lws_meta.new_parent(get_appropriate_ws_url("?mirror=" + mirror_name));
-
 
 document.getElementById("number").textContent = get_appropriate_ws_url(mirror_name);
 
 /* dumb increment protocol */
 
-	/*
-	 * to connect via an lws-meta connection, start the connection using
-	 * lws_meta.new_ws().  To connect by independent connection, start
-	 * the connection using just new_ws()
-	 */
-	
-	var socket_di = lws_meta.new_ws("", "dumb-increment-protocol");
+	var socket_di = new_ws(get_appropriate_ws_url("?mirror=" + mirror_name), "dumb-increment-protocol");
 
 	try {
 		socket_di.onopen = function() {
@@ -604,7 +587,7 @@ document.getElementById("number").textContent = get_appropriate_ws_url(mirror_na
 	var socket_status, jso, s;
 
 
-	socket_status = lws_meta.new_ws(get_appropriate_ws_url(""), "lws-status");
+	socket_status = new_ws(get_appropriate_ws_url("?mirror=" + mirror_name), "lws-status");
 
 	try {
 		socket_status.onopen = function() {
@@ -671,7 +654,7 @@ var socket_ot;
 
 function ot_open() {
 
-	socket_ot = lws_meta.new_ws(get_appropriate_ws_url(""), "dumb-increment-protocol");
+	socket_ot = new_ws(get_appropriate_ws_url("?mirror=" + mirror_name), "dumb-increment-protocol");
 
 	console.log("ot_open");
 
@@ -717,7 +700,7 @@ function ot_req_close() {
 	var socket_lm;
 	var color = "#000000";
 
-	socket_lm = lws_meta.new_ws(get_appropriate_ws_url("?mirror=" + mirror_name),
+	socket_lm = new_ws(get_appropriate_ws_url("?mirror=" + mirror_name),
 			"lws-mirror-protocol");
 
 	try {
