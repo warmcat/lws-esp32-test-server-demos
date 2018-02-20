@@ -131,12 +131,12 @@ void app_main(void)
 	lws_esp32_set_creation_defaults(&info);
 
 	info.port = 443;
-	info.fd_limit_per_thread = 10;
+	info.fd_limit_per_thread = 12;
 	info.max_http_header_pool = 12;
 	info.max_http_header_data = 512;
 	info.pt_serv_buf_size = 900;
 	info.keepalive_timeout = 5;
-	info.simultaneous_ssl_restriction = 8;
+	info.simultaneous_ssl_restriction = 12;
 	info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS |
 		       LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
 

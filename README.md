@@ -25,9 +25,21 @@ When you open the page the html / png assets are served over http/2
 or http/1 depending on how you connected.  Then the browser connects
 back over http/1 and upgrades to ws.
 
+It opens a lot of simultaneous https connections, one for each ws
+protocol and one for http/2 to carry the HTML and images, so on ESP32
+it's a bit slow to start up.
+
+The demo uses my mbedtls patches for dynamic buffer allocation, so
+compared to the unpatched mbedtls, you can open many tls connections
+without killing your RAM.
+
+In the next months wss-over-http/2 is coming, meaning everything just
+uses the one http/2 link and one tls connection.  But the browsers
+have not implemented it yet.
+
 ## Build
 
-This was built and tested againt esp-idf daa8cfa800677a71a3447eba418a4336979a3cb8 from 2018-01-26.
+This was built and tested againt esp-idf cded92bd3c39232295be6d901befe847db22bc74 from 2018-02-20.
 
 Clone and bring in the lws submodule (it's unpatched lws master)
 
