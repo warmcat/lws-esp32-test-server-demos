@@ -3,4 +3,4 @@ sdkconfig.old
 _sdkconfig
 romfs-files/ssl-cert.der
 romfs-files/ssl-key.der
-
+push.sh

@@ -25,6 +25,11 @@ When you open the page the html / png assets are served over http/2
 or http/1 depending on how you connected.  Then the browser connects
 back over http/1 and upgrades to ws.
 
+Basic auth is also demoed, see main/main.c for the details of how it
+works.  You can visit the URL /secret, which you cannot see until
+you log in with "user" and "password".  These are set in code in
+main/main.c.
+
 It opens a lot of simultaneous https connections, one for each ws
 protocol and one for http/2 to carry the HTML and images, so on ESP32
 it's a bit slow to start up.

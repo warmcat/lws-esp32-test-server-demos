@@ -94,6 +94,25 @@ static const struct lws_http_mount mount_station = {
         .mountpoint_len		= 1,
 };
 
+/*
+ * this serves "/secret/" in the romfs at "/secret" in the URL namespace
+ * it requires basic auth, which for the demo is set to literally user / password
+ * This is just demoing how to do basic auth.
+ *
+ * See below how the password is set
+ */
+static const struct lws_http_mount mount_station_needs_auth = {
+        .mount_next		= &mount_station,
+        .mountpoint		= "/secret",
+        .origin			= "/secret",
+        .def			= "index.html",
+        .origin_protocol	= LWSMPRO_FILE,
+        .mountpoint_len		= 7,
+
+	.basic_auth_login_file	= "lwsdemoba", /* esp32 nvs realm to use */
+};
+
+
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
 	/* deal with your own user events here first */
@@ -127,6 +146,7 @@ void app_main(void)
 	static struct lws_context_creation_info info;
 	struct lws_context *context;
 	struct lws_vhost *vh;
+	nvs_handle nvh;
 
 	lws_esp32_set_creation_defaults(&info);
 
@@ -145,11 +165,22 @@ void app_main(void)
 
 	info.vhost_name = "station";
 	info.protocols = protocols_station;
-	info.mounts = &mount_station;
+	info.mounts = &mount_station_needs_auth;
 	info.headers = &pvo_headers;
 
 	nvs_flash_init();
 	lws_esp32_wlan_config();
+
+	/*
+	 * set the basic auth user:password used for /secret/... urls
+	 * normally you'd just do this once at setup-time or if the
+	 * password was changed.  If you don't use basic auth on your
+	 * site, no need for this.
+	 */
+	if (!nvs_open("lwsdemoba", NVS_READWRITE, &nvh)) {
+		nvs_set_str(nvh, "user", "password");
+		nvs_close(nvh);
+	}
 
 	ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL));
 
