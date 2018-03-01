@@ -179,6 +179,7 @@ void app_main(void)
 	 */
 	if (!nvs_open("lwsdemoba", NVS_READWRITE, &nvh)) {
 		nvs_set_str(nvh, "user", "password");
+		nvs_commit(nvh);
 		nvs_close(nvh);
 	}
 
