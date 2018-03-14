@@ -16,6 +16,14 @@ This includes the latest lws HTTP/2 support now, improved
 memory management for headers, and mbedTLS wrapper fixes to
 improve speed when multiple SSL connections are coming.
 
+It also now supports ws-over-http2 tunelling, meaning all
+the ws connections and the http actions share the same tls
+tunnel.  This makes a massive improvement in speed and
+reduced memory consumption.
+
+As of 2018-03-14 only Chrome Canary 67 supports this new
+mode, but support in other browsers is coming.
+
 ## About this demo
 
 This demo is the standard lws test server using the standard lws test
@@ -38,13 +46,9 @@ The demo uses my mbedtls patches for dynamic buffer allocation, so
 compared to the unpatched mbedtls, you can open many tls connections
 without killing your RAM.
 
-In the next months wss-over-http/2 is coming, meaning everything just
-uses the one http/2 link and one tls connection.  But the browsers
-have not implemented it yet.
-
 ## Build
 
-This was built and tested againt esp-idf cded92bd3c39232295be6d901befe847db22bc74 from 2018-02-20.
+This was built and tested againt esp-idf 77eae33a7ec6c4d42552b07f3dc2f51d0ff4e49c from 2018-03-14.
 
 Clone and bring in the lws submodule (it's unpatched lws master)
 
