@@ -21,8 +21,10 @@ the ws connections and the http actions share the same tls
 tunnel.  This makes a massive improvement in speed and
 reduced memory consumption.
 
-As of 2018-03-14 only Chrome Canary 67 supports this new
-mode, but support in other browsers is coming.
+As of 2018-04-12 only Chrome Canary 67 supports this new
+mode, but support in other browsers is coming.  Chrome
+Canary 67 must be started to --enable-websocket-over-http2 to
+allow the new feature to operate.
 
 ## About this demo
 
@@ -44,11 +46,13 @@ it's a bit slow to start up.
 
 The demo uses my mbedtls patches for dynamic buffer allocation, so
 compared to the unpatched mbedtls, you can open many tls connections
-without killing your RAM.
+without killing your RAM.  **NOTE** You should set MBEDTLS_SSL_MAX_CONTENT_LEN
+to 16384 in your sdkconfig.  The patched mbedtls will adapt the buffer
+sizes according to what is actually sent or received.
 
 ## Build
 
-This was built and tested againt esp-idf 77eae33a7ec6c4d42552b07f3dc2f51d0ff4e49c from 2018-03-14.
+This was built and tested againt esp-idf bae9709a7950e2ee08e14c65be27831bcb547105 from 2018-04-11.
 
 Clone and bring in the lws submodule (it's unpatched lws master)
 
