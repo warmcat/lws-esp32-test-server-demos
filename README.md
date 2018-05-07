@@ -52,7 +52,7 @@ sizes according to what is actually sent or received.
 
 ## Build
 
-This was built and tested againt esp-idf bae9709a7950e2ee08e14c65be27831bcb547105 from 2018-04-11.
+This was built and tested againt esp-idf 73ec743a0a7d48685a8614de70ecf2bcb3286715 from 2018-05-07.
 
 Clone and bring in the lws submodule (it's unpatched lws master)
 

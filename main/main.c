@@ -36,7 +36,6 @@
 #include "../components/libwebsockets/plugins/protocol_lws_mirror.c"
 #include "../components/libwebsockets/plugins/protocol_post_demo.c"
 #include "../components/libwebsockets/plugins/protocol_lws_status.c"
-#include "../components/libwebsockets/plugins/protocol_lws_meta.c"
 #include <protocol_esp32_lws_reboot_to_factory.c>
 
 static const struct lws_protocols protocols_station[] = {
@@ -51,7 +50,6 @@ static const struct lws_protocols protocols_station[] = {
 	LWS_PLUGIN_PROTOCOL_POST_DEMO,	    /* your own */
 	LWS_PLUGIN_PROTOCOL_LWS_STATUS,	    /* plugin protocol */
 	LWS_PLUGIN_PROTOCOL_ESPLWS_RTF,	/* helper protocol to allow reset to factory */
-	LWS_PLUGIN_PROTOCOL_LWS_META,	    /* protocol multiplexer */
 	{ NULL, NULL, 0, 0, 0, NULL, 0 } /* terminator */
 };
 
