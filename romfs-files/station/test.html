@@ -89,17 +89,16 @@
 <article>
 
 <table><tr><td>
-
 <table width=600px>
  <tr>
   <td valign=middle align=center>
    <a href="https://libwebsockets.org">
     <img src="libwebsockets.org-logo.png"></a></td><td>
-	<section class="browser">Detected Browser: 
+	<section class="browser">
 	<div id=brow>...</div></section>
   </td>
-  <td width="64" id="transport">
-  </td>
+  <td width="64" height="64" id="wstransport"></td>
+  <td width="64" height="64" id="transport"></td>
  </tr>
 
 </table>
@@ -603,7 +602,8 @@ document.getElementById("number").textContent = get_appropriate_ws_url(mirror_na
 			console.log(msg.data);
 			
 			jso = JSON.parse(msg.data);
-			
+			if (jso.wss_over_h2 == "1")
+				document.getElementById("wstransport").innerHTML = "<img src=\"./wss-over-h2.png\">";	
 			document.getElementById("servinfo").innerHTML = 
 				"<table><tr><td class=l>Build info</td><td>"+
 					san(jso.version) + "</td></tr>" +
