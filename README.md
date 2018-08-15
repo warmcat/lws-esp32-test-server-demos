@@ -62,7 +62,7 @@ Clone and bring in the lws submodule (it's unpatched lws master)
 ```
 
 ```
- $ make flash_ota ; make monitor
+ $ make lws_flash_ota ; make monitor
 ```
 
 ## Using the lws test apps
